@@ -9,10 +9,10 @@ class MandelbrotScreen extends StatefulWidget {
 }
 
 class _MandelbrotScreenState extends State<MandelbrotScreen> {
-  double _scale = 1.0;
+  double _scale = 1.5;
   Offset _offset = Offset.zero;
   Offset? _lastFocalPoint;
-  int _maxIterations = 50; // Reduced iterations for simplicity
+  int _maxIterations = 10; // Reduced iterations for simplicity
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +25,10 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
             icon: const Icon(Icons.restart_alt, color: Colors.white),
             onPressed: () {
               setState(() {
-                _scale = 1.0;
+                _scale = 1.5;
                 _offset = Offset.zero;
               });
+              print('Pressed reset');
             },
           ),
         ],
@@ -47,6 +48,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
             _lastFocalPoint = currentFocalPoint;
           });
         },
+
         child: CustomPaint(
           size: Size.infinite,
           painter: MandelbrotPainter(
@@ -65,6 +67,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
               setState(() {
                 _maxIterations = (_maxIterations + 10).clamp(10, 200);
               });
+              print(_maxIterations.toString());
             },
             mini: true,
             child: const Icon(Icons.add, color: Colors.white),
@@ -76,6 +79,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
               setState(() {
                 _maxIterations = (_maxIterations - 10).clamp(10, 200);
               });
+              print(_maxIterations.toString());
             },
             mini: true,
             child: const Icon(Icons.remove, color: Colors.white),
