@@ -62,7 +62,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
           size: Size.infinite,
           painter: MandelbrotPainter(
             scale: _scale,
-            offset: _offset,
+            offset: _offset + const Offset(100, 0),
             maxIterations: _maxIterations,
             resolution: _isInteracting ? _interactionResolution : 1.0,
           ),
