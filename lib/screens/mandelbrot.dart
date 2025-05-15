@@ -9,10 +9,31 @@ class MandelbrotScreen extends StatefulWidget {
 }
 
 class _MandelbrotScreenState extends State<MandelbrotScreen> {
-  double _scale = 1.5;
+  double _scale = 1.75;
   Offset _offset = Offset.zero;
-  Offset? _lastFocalPoint;
   int _maxIterations = 10; // Reduced iterations for simplicity
+  bool _isInteracting = false;
+  final double _interactionResolution =
+      4.0; // Lower resolution during interaction
+
+  void _handleInteractionStart() {
+    setState(() {
+      _isInteracting = true;
+    });
+  }
+
+  void _handleInteractionUpdate(ScaleUpdateDetails details) {
+    setState(() {
+      _scale /= details.scale;
+      _offset += details.focalPointDelta;
+    });
+  }
+
+  void _handleInteractionEnd() {
+    setState(() {
+      _isInteracting = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +46,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
             icon: const Icon(Icons.restart_alt, color: Colors.white),
             onPressed: () {
               setState(() {
-                _scale = 1.5;
+                _scale = 1.75;
                 _offset = Offset.zero;
               });
               print('Pressed reset');
@@ -34,27 +55,16 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
         ],
       ),
       body: GestureDetector(
-        onScaleStart: (details) {
-          _lastFocalPoint = details.localFocalPoint;
-        },
-        onScaleUpdate: (details) {
-          setState(() {
-            _scale *= details.scale;
-
-            // Calculate the translation caused by the scaling
-            final Offset currentFocalPoint = details.localFocalPoint;
-            final Offset offsetDelta = currentFocalPoint - _lastFocalPoint!;
-            _offset += offsetDelta;
-            _lastFocalPoint = currentFocalPoint;
-          });
-        },
-
+        onScaleStart: (_) => _handleInteractionStart(),
+        onScaleUpdate: _handleInteractionUpdate,
+        onScaleEnd: (_) => _handleInteractionEnd(),
         child: CustomPaint(
           size: Size.infinite,
           painter: MandelbrotPainter(
             scale: _scale,
             offset: _offset,
             maxIterations: _maxIterations,
+            resolution: _isInteracting ? _interactionResolution : 1.0,
           ),
         ),
       ),

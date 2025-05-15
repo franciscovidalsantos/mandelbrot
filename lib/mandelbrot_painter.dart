@@ -4,11 +4,13 @@ class MandelbrotPainter extends CustomPainter {
   final double scale;
   final Offset offset;
   final int maxIterations;
+  final double resolution;
 
   MandelbrotPainter({
     required this.scale,
     required this.offset,
     required this.maxIterations,
+    this.resolution = 1.0,
   });
 
   @override
@@ -22,9 +24,10 @@ class MandelbrotPainter extends CustomPainter {
     final double offsetX = offset.dx / scale;
     final double offsetY = offset.dy / scale;
 
-    for (double x = 0; x < size.width; x++) {
-      for (double y = 0; y < size.height; y++) {
-        // Convert pixel coordinates to complex plane coordinates
+    final double step = resolution; // Use resolution to skip pixels
+
+    for (double x = 0; x < size.width; x += step) {
+      for (double y = 0; y < size.height; y += step) {
         double zx = (x - centerX - offsetX) / adjustedScale;
         double zy = (y - centerY - offsetY) / adjustedScale;
 
@@ -32,30 +35,27 @@ class MandelbrotPainter extends CustomPainter {
         int iteration = 0;
         double cx = zx;
         double cy = zy;
-        double tmp;
 
         while (zx * zx + zy * zy < 4 && iteration < maxIterations) {
-          tmp = zx * zx - zy * zy + cx;
+          final tmp = zx * zx - zy * zy + cx;
           zy = 2 * zx * zy + cy;
           zx = tmp;
           iteration++;
         }
+        double t = iteration / maxIterations;
+        paint.color =
+            iteration == maxIterations
+                // Color based on iterations
+                ? Colors.black
+                // Simple coloring based on iterations
+                : Color.fromRGBO(
+                  (255 * t).toInt(),
+                  (255 * t * t).toInt(),
+                  (255 * (1 - t)).toInt(),
+                  1.0,
+                );
 
-        // Color based on iterations
-        if (iteration == maxIterations) {
-          paint.color = Colors.black;
-        } else {
-          // Simple coloring based on iterations
-          double t = iteration / maxIterations;
-          paint.color = Color.fromRGBO(
-            (255 * t).toInt(),
-            (255 * t * t).toInt(),
-            (255 * (1 - t)).toInt(),
-            1.0,
-          );
-        }
-
-        canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
+        canvas.drawRect(Rect.fromLTWH(x, y, step, step), paint);
       }
     }
   }
@@ -64,6 +64,7 @@ class MandelbrotPainter extends CustomPainter {
   bool shouldRepaint(covariant MandelbrotPainter oldDelegate) {
     return oldDelegate.scale != scale ||
         oldDelegate.offset != offset ||
-        oldDelegate.maxIterations != maxIterations;
+        oldDelegate.maxIterations != maxIterations ||
+        oldDelegate.resolution != resolution;
   }
 }
