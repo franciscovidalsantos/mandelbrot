@@ -16,6 +16,11 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
   final double _interactionResolution =
       4.0; // Lower resolution during interaction
 
+  // Zoom control parameters
+  static const double _zoomSensitivity = 0.5; // Lower = slower zoom (0.1-1.0)
+  static const double _minScale = 0.1; // Minimum zoom level
+  static const double _maxScale = double.infinity; // Maximum zoom level
+
   void _handleInteractionStart() {
     setState(() {
       _isInteracting = true;
@@ -24,7 +29,11 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
 
   void _handleInteractionUpdate(ScaleUpdateDetails details) {
     setState(() {
-      _scale /= details.scale;
+      // Smooth, controlled zoom calculation
+      final double scaleFactor = details.scale;
+      final double zoomFactor = (scaleFactor - 1.0) * _zoomSensitivity + 1.0;
+      _scale = (_scale / zoomFactor).clamp(_minScale, _maxScale);
+
       _offset += details.focalPointDelta;
     });
   }
@@ -48,6 +57,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
               setState(() {
                 _scale = 1.75;
                 _offset = Offset.zero;
+                _maxIterations = 10;
               });
               print('Pressed reset');
             },
@@ -68,8 +78,10 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
           ),
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton(
             backgroundColor: Colors.black,
@@ -77,20 +89,30 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
               setState(() {
                 _maxIterations = (_maxIterations + 10).clamp(10, 200);
               });
-              print(_maxIterations.toString());
             },
             mini: true,
             child: const Icon(Icons.add, color: Colors.white),
           ),
-          const SizedBox(height: 8),
           FloatingActionButton(
             backgroundColor: Colors.black,
-            onPressed: () {
-              setState(() {
-                _maxIterations = (_maxIterations - 10).clamp(10, 200);
-              });
-              print(_maxIterations.toString());
-            },
+            onPressed: null,
+            mini: true,
+            child: Text(
+              _maxIterations.toString(),
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          FloatingActionButton(
+            backgroundColor: Colors.black,
+            onPressed:
+                _maxIterations == 10
+                    ? null
+                    : () {
+                      setState(() {
+                        _maxIterations = (_maxIterations - 10).clamp(10, 200);
+                      });
+                      print(_maxIterations.toString());
+                    },
             mini: true,
             child: const Icon(Icons.remove, color: Colors.white),
           ),
