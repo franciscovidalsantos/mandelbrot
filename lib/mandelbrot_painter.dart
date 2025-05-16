@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class MandelbrotPainter extends CustomPainter {
   final double scale;
   final Offset offset;
-  final int maxIterations;
+  final int currentIterations;
   final double resolution;
 
   MandelbrotPainter({
     required this.scale,
     required this.offset,
-    required this.maxIterations,
+    required this.currentIterations,
     this.resolution = 1.0,
   });
 
@@ -36,15 +36,15 @@ class MandelbrotPainter extends CustomPainter {
         double cx = zx;
         double cy = zy;
 
-        while (zx * zx + zy * zy < 4 && iteration < maxIterations) {
+        while (zx * zx + zy * zy < 4 && iteration < currentIterations) {
           final tmp = zx * zx - zy * zy + cx;
           zy = 2 * zx * zy + cy;
           zx = tmp;
           iteration++;
         }
-        double t = iteration / maxIterations;
+        double t = iteration / currentIterations;
         paint.color =
-            iteration == maxIterations
+            iteration == currentIterations
                 // Color based on iterations
                 ? Colors.black
                 // Simple coloring based on iterations
@@ -52,7 +52,7 @@ class MandelbrotPainter extends CustomPainter {
                   (255 * t).toInt(),
                   (255 * t * t).toInt(),
                   (255 * (1 - t)).toInt(),
-                  1.0,
+                  0.75,
                 );
 
         canvas.drawRect(Rect.fromLTWH(x, y, step, step), paint);
@@ -64,7 +64,7 @@ class MandelbrotPainter extends CustomPainter {
   bool shouldRepaint(covariant MandelbrotPainter oldDelegate) {
     return oldDelegate.scale != scale ||
         oldDelegate.offset != offset ||
-        oldDelegate.maxIterations != maxIterations ||
+        oldDelegate.currentIterations != currentIterations ||
         oldDelegate.resolution != resolution;
   }
 }

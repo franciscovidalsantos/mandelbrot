@@ -11,7 +11,7 @@ class MandelbrotScreen extends StatefulWidget {
 class _MandelbrotScreenState extends State<MandelbrotScreen> {
   double _scale = 1.75;
   Offset _offset = Offset.zero;
-  int _maxIterations = 10; // Reduced iterations for simplicity
+  int _currentIterations = 5; // Reduced iterations for simplicity
   bool _isInteracting = false;
   final double _interactionResolution =
       4.0; // Lower resolution during interaction
@@ -57,7 +57,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
               setState(() {
                 _scale = 1.75;
                 _offset = Offset.zero;
-                _maxIterations = 10;
+                _currentIterations = 5;
               });
               print('Pressed reset');
             },
@@ -73,7 +73,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
           painter: MandelbrotPainter(
             scale: _scale,
             offset: _offset + const Offset(100, 0),
-            maxIterations: _maxIterations,
+            currentIterations: _currentIterations,
             resolution: _isInteracting ? _interactionResolution : 1.0,
           ),
         ),
@@ -87,7 +87,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
             backgroundColor: Colors.black,
             onPressed: () {
               setState(() {
-                _maxIterations = (_maxIterations + 10).clamp(10, 200);
+                _currentIterations = (_currentIterations + 5).clamp(5, 200);
               });
             },
             mini: true,
@@ -98,20 +98,23 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
             onPressed: null,
             mini: true,
             child: Text(
-              _maxIterations.toString(),
+              _currentIterations.toString(),
               style: TextStyle(color: Colors.white),
             ),
           ),
           FloatingActionButton(
             backgroundColor: Colors.black,
             onPressed:
-                _maxIterations == 10
+                _currentIterations == 5
                     ? null
                     : () {
                       setState(() {
-                        _maxIterations = (_maxIterations - 10).clamp(10, 200);
+                        _currentIterations = (_currentIterations - 5).clamp(
+                          5,
+                          200,
+                        );
                       });
-                      print(_maxIterations.toString());
+                      print(_currentIterations.toString());
                     },
             mini: true,
             child: const Icon(Icons.remove, color: Colors.white),
