@@ -90,25 +90,6 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
         children: [
           FloatingActionButton(
             backgroundColor: Colors.black,
-            onPressed: () {
-              setState(() {
-                _currentIterations = (_currentIterations + 5).clamp(5, 200);
-              });
-            },
-            mini: true,
-            child: const Icon(Icons.add, color: Colors.white),
-          ),
-          FloatingActionButton(
-            backgroundColor: Colors.black,
-            onPressed: null,
-            mini: true,
-            child: Text(
-              _currentIterations.toString(),
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          FloatingActionButton(
-            backgroundColor: Colors.black,
             onPressed:
                 _currentIterations == 5
                     ? null
@@ -123,6 +104,25 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
                     },
             mini: true,
             child: const Icon(Icons.remove, color: Colors.white),
+          ),
+          FloatingActionButton(
+            backgroundColor: Colors.black,
+            onPressed: null,
+            mini: true,
+            child: Text(
+              _currentIterations.toString(),
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          FloatingActionButton(
+            backgroundColor: Colors.black,
+            onPressed: () {
+              setState(() {
+                _currentIterations = (_currentIterations + 5).clamp(5, 200);
+              });
+            },
+            mini: true,
+            child: const Icon(Icons.add, color: Colors.white),
           ),
         ],
       ),
