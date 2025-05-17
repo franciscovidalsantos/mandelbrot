@@ -22,7 +22,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
   // static const double _minScale = 0.1; // Minimum zoom level
   // static const double _maxScale = double.infinity; // Maximum zoom level
 
-  void _handleInteractionStart() {
+  void _handleInteractionStart(ScaleStartDetails details) {
     setState(() {
       _isInteracting = true;
     });
@@ -41,7 +41,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
     });
   }
 
-  void _handleInteractionEnd() {
+  void _handleInteractionEnd(ScaleEndDetails details) {
     setState(() {
       _isInteracting = false;
     });
@@ -68,9 +68,9 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
         ],
       ),
       body: GestureDetector(
-        onScaleStart: (_) => _handleInteractionStart(),
+        onScaleStart: _handleInteractionStart,
         onScaleUpdate: _handleInteractionUpdate,
-        onScaleEnd: (_) => _handleInteractionEnd(),
+        onScaleEnd: _handleInteractionEnd,
         child: CustomPaint(
           isComplex: true,
           willChange: _isInteracting,
@@ -90,6 +90,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
         children: [
           FloatingActionButton(
             backgroundColor: Colors.black,
+            // Disable button when iterations count are bellow 5
             onPressed:
                 _currentIterations == 5
                     ? null
@@ -116,11 +117,18 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
           ),
           FloatingActionButton(
             backgroundColor: Colors.black,
-            onPressed: () {
-              setState(() {
-                _currentIterations = (_currentIterations + 5).clamp(5, 200);
-              });
-            },
+            // Disable button when iterations count are above 200
+            onPressed:
+                _currentIterations == 200
+                    ? null
+                    : () {
+                      setState(() {
+                        _currentIterations = (_currentIterations + 5).clamp(
+                          5,
+                          200,
+                        );
+                      });
+                    },
             mini: true,
             child: const Icon(Icons.add, color: Colors.white),
           ),
