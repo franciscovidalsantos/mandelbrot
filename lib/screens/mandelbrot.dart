@@ -9,8 +9,9 @@ class MandelbrotScreen extends StatefulWidget {
 }
 
 class _MandelbrotScreenState extends State<MandelbrotScreen> {
-  double _scale = 1.75;
-  Offset _offset = Offset.zero;
+  double _startingZoomScale = 1.75;
+  Offset _startingZoomOffset = Offset.zero;
+
   int _currentIterations = 5; // Minimum iterations value
   bool _isInteracting = false;
 
@@ -18,11 +19,16 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
   double get _resolution => _isInteracting ? 4.0 : 1.0;
 
   // Zoom control parameters
-  static const double _zoomSensitivity = 0.05; // Lower = slower zoom (0.0-1.0)
-  // static const double _minScale = 0.1; // Minimum zoom level
-  // static const double _maxScale = double.infinity; // Maximum zoom level
+  // static const double _zoomSensitivity = 0.05; // Lower = slower zoom (0.0-1.0)
+  final double _maxZoomScale = 2.0;
+  final Offset _maxZoomOffset = Offset.zero;
+
+  // Gesture-related state
+  double _initialGestureScale = 1.0;
 
   void _handleInteractionStart(ScaleStartDetails details) {
+    _initialGestureScale = _startingZoomScale;
+
     setState(() {
       _isInteracting = true;
     });
@@ -31,13 +37,22 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
   void _handleInteractionUpdate(ScaleUpdateDetails details) {
     setState(() {
       // Smooth, controlled zoom calculation
-      final double scaleFactor = details.scale;
-      final double zoomFactor = (scaleFactor - 1.0) * _zoomSensitivity + 1.0;
-      // _scale = (_scale / zoomFactor).clamp(_minScale, _maxScale);
+      final double gestureScale = details.scale;
+      double newZoomScale = _initialGestureScale / gestureScale;
 
-      _scale = (_scale / zoomFactor);
+      // Clamp to max scale (max zoomed-out)
+      if (newZoomScale > _maxZoomScale) {
+        newZoomScale = _maxZoomScale;
+      }
 
-      _offset += details.focalPointDelta;
+      // Update only if we're not hitting min zoom
+      if (newZoomScale < _maxZoomScale) {
+        _startingZoomOffset += details.focalPointDelta;
+      } else {
+        _startingZoomOffset = _maxZoomOffset;
+      }
+
+      _startingZoomScale = newZoomScale;
     });
   }
 
@@ -58,8 +73,8 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
             icon: const Icon(Icons.restart_alt, color: Colors.white),
             onPressed: () {
               setState(() {
-                _scale = 1.75;
-                _offset = Offset.zero;
+                _startingZoomScale = 1.75;
+                _startingZoomOffset = Offset.zero;
                 _currentIterations = 5;
               });
               print('Pressed reset');
@@ -76,8 +91,8 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
           willChange: _isInteracting,
           size: Size.infinite,
           painter: MandelbrotPainter(
-            scale: _scale,
-            offset: _offset + const Offset(100, 0),
+            scale: _startingZoomScale,
+            offset: _startingZoomOffset + const Offset(100, 0),
             currentIterations: _currentIterations,
             resolution: _resolution,
           ),
