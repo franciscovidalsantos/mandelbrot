@@ -9,19 +9,19 @@ class MandelbrotScreen extends StatefulWidget {
 }
 
 class _MandelbrotScreenState extends State<MandelbrotScreen> {
+  // Starting zoom parameters
   double _startingZoomScale = 1.75;
   Offset _startingZoomOffset = Offset.zero;
+  // Maximum zoom parameters
+  final double _maxZoomScale = 2.0;
+  final Offset _maxZoomOffset = Offset.zero;
 
   int _currentIterations = 5; // Minimum iterations value
+
   bool _isInteracting = false;
 
   // Dynamic resolution based on interaction
   double get _resolution => _isInteracting ? 4.0 : 1.0;
-
-  // Zoom control parameters
-  // static const double _zoomSensitivity = 0.05; // Lower = slower zoom (0.0-1.0)
-  final double _maxZoomScale = 2.0;
-  final Offset _maxZoomOffset = Offset.zero;
 
   // Gesture-related state
   double _initialGestureScale = 1.0;
@@ -36,23 +36,21 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
 
   void _handleInteractionUpdate(ScaleUpdateDetails details) {
     setState(() {
-      // Smooth, controlled zoom calculation
-      final double gestureScale = details.scale;
-      double newZoomScale = _initialGestureScale / gestureScale;
+      double zoomingScale = _initialGestureScale / details.scale;
 
-      // Clamp to max scale (max zoomed-out)
-      if (newZoomScale > _maxZoomScale) {
-        newZoomScale = _maxZoomScale;
+      // Limit current zooming scale to a maximum value
+      if (zoomingScale > _maxZoomScale) {
+        zoomingScale = _maxZoomScale;
       }
 
       // Update only if we're not hitting min zoom
-      if (newZoomScale < _maxZoomScale) {
-        _startingZoomOffset += details.focalPointDelta;
+      if (zoomingScale < _maxZoomScale) {
+        _startingZoomOffset += details.focalPointDelta * zoomingScale;
       } else {
         _startingZoomOffset = _maxZoomOffset;
       }
 
-      _startingZoomScale = newZoomScale;
+      _startingZoomScale = zoomingScale;
     });
   }
 
@@ -92,7 +90,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
           size: Size.infinite,
           painter: MandelbrotPainter(
             scale: _startingZoomScale,
-            offset: _startingZoomOffset + const Offset(100, 0),
+            offset: _startingZoomOffset + const Offset(150, 0),
             currentIterations: _currentIterations,
             resolution: _resolution,
           ),
