@@ -16,41 +16,38 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
   final double _maxZoomScale = 2.0;
   final Offset _maxZoomOffset = Offset.zero;
   // Dynamic zoom parameters
-  late double _currentZoomScale;
-  late Offset _currentZoomOffset;
+  late double _scale;
+  late Offset _offset;
+  late double _interactionScale;
 
   int _currentIterations = 5; // Minimum iterations value
 
   bool _isInteracting = false;
+
   // Dynamic resolution based on interaction
   double get _resolution => _isInteracting ? 4.0 : 1.0;
 
-  // Gesture-related state
-  double _initialGestureScale = 1.0;
-
   void _handleInteractionStart(ScaleStartDetails details) {
-    _initialGestureScale = _currentZoomScale;
-
+    _interactionScale = _scale;
     setState(() {
       _isInteracting = true;
     });
   }
 
   void _handleInteractionUpdate(ScaleUpdateDetails details) {
+    double interactionScale = _interactionScale / details.scale;
     setState(() {
-      double zoomingScale = _initialGestureScale / details.scale;
-
       // Limit zoom while zooming out
-      if (zoomingScale > _maxZoomScale) {
-        _currentZoomScale = _maxZoomScale;
-        _currentZoomOffset = _maxZoomOffset;
+      if (interactionScale > _maxZoomScale) {
+        _scale = _maxZoomScale;
+        _offset = _maxZoomOffset;
         return;
       }
-
       // Update zoom while zooming in
-      if (zoomingScale < _maxZoomScale) {
-        _currentZoomScale = zoomingScale;
-        _currentZoomOffset += details.focalPointDelta * zoomingScale;
+      if (interactionScale < _maxZoomScale) {
+        _scale = interactionScale;
+        _offset += details.focalPointDelta * interactionScale;
+        return;
       }
     });
   }
@@ -65,8 +62,8 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
   void initState() {
     super.initState();
     // Initialize zoom parameters
-    _currentZoomScale = _startingZoomScale;
-    _currentZoomOffset = _startingZoomOffset;
+    _scale = _startingZoomScale;
+    _offset = _startingZoomOffset;
   }
 
   @override
@@ -80,8 +77,8 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
             icon: const Icon(Icons.restart_alt, color: Colors.white),
             onPressed: () {
               setState(() {
-                _currentZoomScale = _startingZoomScale;
-                _currentZoomOffset = _startingZoomOffset;
+                _scale = _startingZoomScale;
+                _offset = _startingZoomOffset;
                 _currentIterations = 5;
               });
               print('Pressed reset');
@@ -98,8 +95,8 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
           willChange: _isInteracting,
           size: Size.infinite,
           painter: MandelbrotPainter(
-            scale: _currentZoomScale,
-            offset: _currentZoomOffset + const Offset(150, 0),
+            scale: _scale,
+            offset: _offset + const Offset(150, 0),
             currentIterations: _currentIterations,
             resolution: _resolution,
           ),
