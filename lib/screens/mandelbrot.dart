@@ -24,9 +24,6 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
 
   bool _isInteracting = false;
 
-  // Dynamic resolution based on interaction
-  double get _resolution => _isInteracting ? 4.0 : 1.0;
-
   void _handleInteractionStart(ScaleStartDetails details) {
     _interactionScale = _scale;
     setState(() {
@@ -81,7 +78,6 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
                 _offset = _startingZoomOffset;
                 _currentIterations = 5;
               });
-              print('Pressed reset');
             },
           ),
         ],
@@ -98,7 +94,7 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
             scale: _scale,
             offset: _offset + const Offset(150, 0),
             currentIterations: _currentIterations,
-            resolution: _resolution,
+            resolution: _isInteracting ? 4.0 : 1.0,
           ),
         ),
       ),
@@ -117,10 +113,9 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
                       setState(() {
                         _currentIterations = (_currentIterations - 5).clamp(
                           5,
-                          200,
+                          1000,
                         );
                       });
-                      print(_currentIterations.toString());
                     },
             mini: true,
             child: const Icon(Icons.remove, color: Colors.white),
@@ -136,15 +131,15 @@ class _MandelbrotScreenState extends State<MandelbrotScreen> {
           ),
           FloatingActionButton(
             backgroundColor: Colors.black,
-            // Disable button when iterations count are above 200
+            // Disable button when iterations count are above 1000
             onPressed:
-                _currentIterations == 200
+                _currentIterations == 1000
                     ? null
                     : () {
                       setState(() {
                         _currentIterations = (_currentIterations + 5).clamp(
                           5,
-                          200,
+                          1000,
                         );
                       });
                     },
